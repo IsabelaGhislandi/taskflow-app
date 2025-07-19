@@ -3,7 +3,6 @@ from django.db import models
 
 
 class CustomUserManager(BaseUserManager):
-    """Custom user manager for CustomUser model."""
     
     def create_user(self, email, first_name, last_name, password=None, **extra_fields):
         """Create and return a regular user with an email and password."""

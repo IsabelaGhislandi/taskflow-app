@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 
 class Task(models.Model):
@@ -77,11 +78,21 @@ class Task(models.Model):
         return f"{self.title} ({self.user.email})"
     
     def save(self, *args, **kwargs):
+        """Override save to handle completed_at field automatically."""
         if self.status == 'done' and not self.completed_at:
             self.completed_at = timezone.now()
         elif self.status != 'done':
             self.completed_at = None
         super().save(*args, **kwargs)
+    
+    def clean(self):
+        """Model validation."""
+        super().clean()
+        if self.due_date and self.created_at and self.due_date <= self.created_at:
+            raise ValidationError("Due date must be in the future.")
+        
+        if not self.title.strip() if self.title else False:
+            raise ValidationError("Title cannot be empty.")
     
     @property
     def is_overdue(self):

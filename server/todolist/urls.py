@@ -28,7 +28,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
-    # API endpoints (será configurado quando criarmos os apps)
-    # path('api/auth/', include('accounts.urls')),
-    # path('api/tasks/', include('tasks.urls')),
+    # API endpoints
+    path('api/auth/', include('accounts.urls')),
+    path('api/tasks/', include('tasks.urls')),
 ]
