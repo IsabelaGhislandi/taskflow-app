@@ -1,0 +1,45 @@
+## Projeto: Evolução para Kanban
+
+Minha ideia principal é evoluir a aplicação para um modelo **Kanban**, onde as tarefas possam ser organizadas em colunas (ex: "A Fazer", "Em Progresso", "Concluído") e movidas entre elas de forma intuitiva, possivelmente com drag-and-drop.  
+A base do código já está preparada para isso, e a refatoração vai facilitar muito a implementação desse tipo de funcionalidade.
+
+---
+
+### Componentização
+
+- Dividir o código em componentes menores e reutilizáveis, como `TaskItem`, `Message` e outros.
+- Tornar o código mais legível e fácil de testar.
+
+---
+
+### Validação e Acessibilidade
+
+- Melhorar a validação dos campos tanto no frontend quanto no backend.
+- Aprimorar a acessibilidade com o uso de elementos semânticos e `aria-labels`.
+
+---
+
+### Tratamento de Erros
+
+- Garantir que mensagens de erro vindas do backend sejam exibidas de forma clara e amigável para o usuário.
+
+---
+
+### Organização e Escalabilidade
+
+- Separar as chamadas de API em arquivos próprios.
+- Caso o projeto cresça, utilizar contextos ou Redux para gerenciamento de estado global.
+
+---
+
+### Inclusão de Testes
+
+- Acrescentar testes automatizados, tanto para o frontend (componentes React, hooks e integrações) quanto para o backend (views, serializers e models).
+
+---
+
+### Deploy da Aplicação
+
+- Preparar o projeto para deploy em ambientes de produção, garantindo facilidade de publicação e manutenção.
+
+---
