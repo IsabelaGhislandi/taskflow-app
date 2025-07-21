@@ -5,7 +5,7 @@ from django.db import models
 class CustomUserManager(BaseUserManager):
     
     def create_user(self, email, first_name, last_name, password=None, **extra_fields):
-        """Create and return a regular user with an email and password."""
+        
         if not email:
             raise ValueError('The Email field must be set')
         
@@ -21,7 +21,7 @@ class CustomUserManager(BaseUserManager):
         return user
     
     def create_superuser(self, email, first_name, last_name, password=None, **extra_fields):
-        """Create and return a superuser with an email and password."""
+       
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         
@@ -34,10 +34,7 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractUser):
-    # Remove username field
     username = None
-    
-    # Email as primary identifier
     email = models.EmailField(
         unique=True,
         verbose_name='Email Address'
@@ -69,5 +66,5 @@ class CustomUser(AbstractUser):
     
     @property
     def full_name(self):
-        """Returns the full name of the user."""
+
         return f"{self.first_name} {self.last_name}".strip()

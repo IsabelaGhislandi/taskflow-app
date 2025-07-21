@@ -4,17 +4,18 @@ from .models import CustomUser
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for user profile information."""
-    full_name = serializers.ReadOnlyField()
+  
+    name = serializers.SerializerMethodField()
     
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'first_name', 'last_name', 'full_name', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
+        fields = ['id', 'email', 'first_name', 'last_name', 'name', 'date_joined']
+    
+    def get_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """Serializer for user registration."""
+   
     password = serializers.CharField(
         write_only=True, 
         min_length=8,
@@ -27,10 +28,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         fields = ['email', 'first_name', 'last_name', 'password', 'password_confirm']
         
     def validate_email(self, value):
-        """Check that email is unique."""
+     
         if CustomUser.objects.filter(email=value).exists():
             raise serializers.ValidationError("User with this email already exists.")
         return value
+
     
     def validate(self, data):
         if data['password'] != data['password_confirm']:
@@ -44,14 +46,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for updating user profile information."""
     
     class Meta:
         model = CustomUser
         fields = ['first_name', 'last_name']
         
     def update(self, instance, validated_data):
-        """Update user profile fields."""
+       
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.save()

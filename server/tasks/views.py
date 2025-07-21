@@ -15,7 +15,10 @@ from .serializers import (
 
 
 class TaskViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
+    
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'priority', 'created_at', 'due_date']
     search_fields = ['title', 'description']
@@ -33,12 +36,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         return TaskSerializer
     
     def perform_create(self, serializer):
-        """Save task with current user."""
         serializer.save(user=self.request.user)
     
     @action(detail=True, methods=['patch'])
     def update_status(self, request, pk=None):
-        """Update only task status (for Kanban drag & drop)."""
         task = self.get_object()
         serializer = TaskStatusUpdateSerializer(task, data=request.data, partial=True)
         
@@ -47,19 +48,17 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Response(TaskSerializer(task).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    @action(detail=False, methods=['get'])
-    def kanban(self, request):
-        """Return tasks organized by status for Kanban board."""
-        queryset = self.get_queryset()
-        
-        kanban_data = {
-            'todo': TaskSerializer(queryset.filter(status='todo'), many=True).data,
-            'in_progress': TaskSerializer(queryset.filter(status='in_progress'), many=True).data,
-            'done': TaskSerializer(queryset.filter(status='done'), many=True).data,
-        }
-        
-        return Response(kanban_data)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        # Re-serializa com TaskSerializer para garantir que o id venha na resposta
+        task = serializer.instance
+        response_serializer = TaskSerializer(task, context={'request': request})
+        headers = self.get_success_headers(serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
+   
     @action(detail=False, methods=['get'])
     def overdue(self, request):
         """Return overdue tasks."""

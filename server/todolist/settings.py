@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
-    
+    'corsheaders',
     # Local apps
     'accounts',
     'tasks',
@@ -178,6 +178,15 @@ SIMPLE_JWT = {
     
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
 # CORS Configuration for React Frontend
