@@ -12,9 +12,29 @@ from .serializers import (
     TaskUpdateSerializer,
     TaskStatusUpdateSerializer
 )
+from .services import TaskService
 
 
 class TaskViewSet(viewsets.ModelViewSet):
+    @staticmethod
+    def get_overdue_tasks(queryset):
+        return queryset.filter(
+            due_date__lt=timezone.now(),
+            status__in=['todo', 'in_progress']
+        )
+
+    @staticmethod
+    def get_stats(queryset):
+        return {
+            'total': queryset.count(),
+            'todo': queryset.filter(status='todo').count(),
+            'in_progress': queryset.filter(status='in_progress').count(),
+            'done': queryset.filter(status='done').count(),
+            'high_priority': queryset.filter(priority='high').count(),
+            'overdue': TaskService.get_overdue_tasks(queryset).count()
+        }
+
+
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
@@ -52,7 +72,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        # Re-serializa com TaskSerializer para garantir que o id venha na resposta
         task = serializer.instance
         response_serializer = TaskSerializer(task, context={'request': request})
         headers = self.get_success_headers(serializer.data)
@@ -62,28 +81,13 @@ class TaskViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def overdue(self, request):
         """Return overdue tasks."""
-        queryset = self.get_queryset().filter(
-            due_date__lt=timezone.now(),
-            status__in=['todo', 'in_progress']
-        )
-        
-        serializer = TaskSerializer(queryset, many=True)
+        queryset = self.get_queryset()
+        overdue_tasks = TaskService.get_overdue_tasks(queryset)
+        serializer = TaskSerializer(overdue_tasks, many=True)
         return Response(serializer.data)
     
     @action(detail=False, methods=['get'])
     def stats(self, request):
         queryset = self.get_queryset()
-        
-        stats = {
-            'total': queryset.count(),
-            'todo': queryset.filter(status='todo').count(),
-            'in_progress': queryset.filter(status='in_progress').count(),
-            'done': queryset.filter(status='done').count(),
-            'high_priority': queryset.filter(priority='high').count(),
-            'overdue': queryset.filter(
-                due_date__lt=timezone.now(),
-                status__in=['todo', 'in_progress']
-            ).count()
-        }
-        
+        stats = TaskService.get_stats(queryset)
         return Response(stats)
